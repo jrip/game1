@@ -1,5 +1,7 @@
 # Browser + Mobile 2D Game Starter
 
+[![Deploy status](https://github.com/jrip/game1/actions/workflows/deploy.yml/badge.svg)](https://github.com/jrip/game1/actions/workflows/deploy.yml)
+
 Стартовый проект для 2D-игры на TypeScript с упором на чистую архитектуру:
 
 - движок: `Phaser 3`
