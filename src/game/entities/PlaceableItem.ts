@@ -1,11 +1,6 @@
 import Phaser from 'phaser';
 import type { PlaceableKind } from '../types';
 
-const textureByKind: Record<PlaceableKind, string> = {
-  flower: 'item-flower',
-  totem: 'item-totem',
-};
-
 export class PlaceableItem extends Phaser.GameObjects.Container {
   public readonly kind: PlaceableKind;
 
@@ -13,8 +8,9 @@ export class PlaceableItem extends Phaser.GameObjects.Container {
     super(scene, x, y);
     this.kind = kind;
 
+    const textureKey = `mob-${kind}`;
     const shadow = scene.add.ellipse(0, 10, 34, 12, 0x0f172a, 0.2);
-    const sprite = scene.add.image(0, 0, textureByKind[kind]).setDisplaySize(30, 30);
+    const sprite = scene.add.image(0, 0, textureKey).setDisplaySize(32, 32);
     this.add([shadow, sprite]);
 
     scene.tweens.add({

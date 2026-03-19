@@ -5,7 +5,8 @@ import { HudScene } from './scenes/HudScene';
 import { GAME_HEIGHT, GAME_WIDTH } from './constants';
 
 export const GAME_CONFIG: Types.Core.GameConfig = {
-  type: Phaser.AUTO,
+  type: Phaser.CANVAS,
+  transparent: true,
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
   backgroundColor: '#0b1220',

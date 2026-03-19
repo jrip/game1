@@ -2,21 +2,22 @@ import Phaser from 'phaser';
 import { GAME_EVENTS } from '../events';
 import { MATCH_TIME_SECONDS } from '../constants';
 import type { PlaceableKind } from '../types';
+import { MOB_DEFINITIONS } from '../mobSettings';
 
 export class GameStateStore extends Phaser.Events.EventEmitter {
   private score = 0;
   private timeLeft = MATCH_TIME_SECONDS;
-  private selectedPlaceable: PlaceableKind | null = 'flower';
+  private nextMob: PlaceableKind = MOB_DEFINITIONS[0]?.id ?? 1;
   private finished = false;
 
   public reset(): void {
     this.score = 0;
     this.timeLeft = MATCH_TIME_SECONDS;
-    this.selectedPlaceable = 'flower';
+    this.nextMob = MOB_DEFINITIONS[0]?.id ?? 1;
     this.finished = false;
     this.emit(GAME_EVENTS.scoreChanged, this.score);
     this.emit(GAME_EVENTS.timeChanged, this.timeLeft);
-    this.emit(GAME_EVENTS.selectedPlaceableChanged, this.selectedPlaceable);
+    this.emit(GAME_EVENTS.nextMobChanged, this.nextMob);
   }
 
   public addScore(value: number): void {
@@ -48,9 +49,9 @@ export class GameStateStore extends Phaser.Events.EventEmitter {
     }
   }
 
-  public setSelectedPlaceable(kind: PlaceableKind | null): void {
-    this.selectedPlaceable = kind;
-    this.emit(GAME_EVENTS.selectedPlaceableChanged, kind);
+  public setNextMob(kind: PlaceableKind): void {
+    this.nextMob = kind;
+    this.emit(GAME_EVENTS.nextMobChanged, kind);
   }
 
   public isFinished(): boolean {
@@ -65,8 +66,8 @@ export class GameStateStore extends Phaser.Events.EventEmitter {
     return this.timeLeft;
   }
 
-  public getSelectedPlaceable(): PlaceableKind | null {
-    return this.selectedPlaceable;
+  public getNextMob(): PlaceableKind {
+    return this.nextMob;
   }
 }
 

@@ -1,6 +1,6 @@
 export const GAME_EVENTS = {
   scoreChanged: 'scoreChanged',
   timeChanged: 'timeChanged',
-  selectedPlaceableChanged: 'selectedPlaceableChanged',
+  nextMobChanged: 'nextMobChanged',
   gameOver: 'gameOver',
 } as const;

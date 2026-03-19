@@ -1,4 +1,4 @@
-import type { CreatureKind, PlaceableKind } from './types';
+import type { CreatureKind } from './types';
 
 export const GRID_ROWS = 15;
 export const GRID_COLS = 20;
@@ -21,9 +21,4 @@ export const CREATURE_TTL_MS = 3500;
 export const CREATURE_SCORE: Record<CreatureKind, number> = {
   slime: 5,
   beetle: 8,
-};
-
-export const PLACEABLE_COST: Record<PlaceableKind, number> = {
-  flower: 10,
-  totem: 25,
 };

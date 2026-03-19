@@ -1,7 +1,12 @@
 import Phaser from 'phaser';
+import { MOB_DEFINITIONS } from '../mobSettings';
 import { gameStateStore } from '../state/GameStateStore';
 
 function makeCircleTexture(scene: Phaser.Scene, key: string, color: number, ringColor: number): void {
+  if (scene.textures.exists(key)) {
+    return;
+  }
+
   const size = 64;
   const graphics = scene.add.graphics({ x: 0, y: 0 });
   graphics.fillStyle(color, 1);
@@ -12,21 +17,16 @@ function makeCircleTexture(scene: Phaser.Scene, key: string, color: number, ring
   graphics.destroy();
 }
 
-function makeDiamondTexture(scene: Phaser.Scene, key: string, color: number): void {
-  const size = 64;
-  const graphics = scene.add.graphics({ x: 0, y: 0 });
-  graphics.fillStyle(color, 1);
-  graphics.fillPoints(
-    [
-      new Phaser.Geom.Point(size / 2, 8),
-      new Phaser.Geom.Point(size - 10, size / 2),
-      new Phaser.Geom.Point(size / 2, size - 8),
-      new Phaser.Geom.Point(10, size / 2),
-    ],
-    true,
-  );
-  graphics.generateTexture(key, size, size);
-  graphics.destroy();
+function makeMobTexture(scene: Phaser.Scene, mobId: number, maxMobId: number): void {
+  const key = `mob-${mobId}`;
+  if (scene.textures.exists(key)) {
+    return;
+  }
+
+  const hue = (mobId - 1) / Math.max(maxMobId, 1);
+  const base = Phaser.Display.Color.HSVToRGB(hue, 0.7, 0.95).color;
+  const ring = Phaser.Display.Color.HSVToRGB(hue, 0.85, 0.45).color;
+  makeCircleTexture(scene, key, base, ring);
 }
 
 export class BootScene extends Phaser.Scene {
@@ -37,12 +37,11 @@ export class BootScene extends Phaser.Scene {
   public create(): void {
     makeCircleTexture(this, 'creature-slime', 0x4ade80, 0x14532d);
     makeCircleTexture(this, 'creature-beetle', 0xfbbf24, 0x78350f);
-    makeDiamondTexture(this, 'item-flower', 0xc084fc);
-    makeDiamondTexture(this, 'item-totem', 0xfb7185);
+    const maxMobId = MOB_DEFINITIONS[MOB_DEFINITIONS.length - 1]?.id ?? 1;
+    MOB_DEFINITIONS.forEach((mob) => makeMobTexture(this, mob.id, maxMobId));
 
     gameStateStore.reset();
 
     this.scene.start('GameScene');
-    this.scene.start('HudScene');
   }
 }

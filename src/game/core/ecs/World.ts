@@ -66,6 +66,10 @@ export class World {
     return this.placeableByCell.get(cellKey(cell));
   }
 
+  public getPlaceable(id: EntityId): PlaceableComponent | undefined {
+    return this.placeables.get(id);
+  }
+
   public getCreatureEntities(): EntityId[] {
     return [...this.creatures.keys()];
   }

@@ -1,8 +1,7 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH, PLACEABLE_COST } from '../constants';
+import { GAME_WIDTH } from '../constants';
 import { GAME_EVENTS } from '../events';
 import { gameStateStore } from '../state/GameStateStore';
-import type { PlaceableKind } from '../types';
 
 function formatTime(seconds: number): string {
   const safeSeconds = Math.ceil(seconds);
@@ -16,19 +15,22 @@ function formatTime(seconds: number): string {
 export class HudScene extends Phaser.Scene {
   private scoreText?: Phaser.GameObjects.Text;
   private timerText?: Phaser.GameObjects.Text;
-  private readonly buttonMap = new Map<PlaceableKind, Phaser.GameObjects.Container>();
+  private nextMobLabel?: Phaser.GameObjects.Text;
+  private nextMobIcon?: Phaser.GameObjects.Image;
 
   constructor() {
     super({ key: 'HudScene' });
   }
 
   public create(): void {
-    this.cameras.main.setBackgroundColor(0x00000000);
+    // Overlay scene: do not clear the frame, otherwise Canvas renderer can hide lower scenes.
+    (this.cameras.main as Phaser.Cameras.Scene2D.Camera & { clearBeforeRender?: boolean }).clearBeforeRender = false;
+    this.cameras.main.setBackgroundColor('rgba(0,0,0,0)');
 
     this.scoreText = this.addLabel(24, 24, `Score: ${gameStateStore.getScore()}`);
     this.timerText = this.addLabel(GAME_WIDTH - 24, 24, `Time: ${formatTime(gameStateStore.getTimeLeft())}`).setOrigin(1, 0);
 
-    this.createSelectionButtons();
+    this.createNextMobPanel();
     this.attachStoreListeners();
   }
 
@@ -41,48 +43,37 @@ export class HudScene extends Phaser.Scene {
     });
   }
 
-  private createSelectionButtons(): void {
-    const y = GAME_HEIGHT - 48;
-    this.addLabel(24, y - 40, 'Place items:');
+  private createNextMobPanel(): void {
+    const panelWidth = 260;
+    const panelHeight = 80;
+    const x = GAME_WIDTH - panelWidth / 2 - 18;
+    const y = 84;
 
-    this.createButton('flower', 240, y, '#d8b4fe');
-    this.createButton('totem', 430, y, '#fb7185');
-  }
+    this.add.rectangle(x, y, panelWidth, panelHeight, 0x0f172a, 0.92).setStrokeStyle(2, 0x64748b, 1);
 
-  private createButton(kind: PlaceableKind, x: number, y: number, color: string): void {
-    const width = 170;
-    const height = 58;
-    const cost = PLACEABLE_COST[kind];
-
-    const bg = this.add.rectangle(0, 0, width, height, 0x0f172a, 0.95).setStrokeStyle(2, 0x64748b, 1);
-    const label = this.add
-      .text(0, 0, `${kind} (${cost})`, {
+    this.add
+      .text(x - 78, y - 20, 'Следующий моб', {
         fontFamily: 'Arial',
-        fontSize: '21px',
-        color,
+        fontSize: '18px',
+        color: '#e2e8f0',
       })
-      .setOrigin(0.5);
+      .setOrigin(0, 0.5);
 
-    const button = this.add.container(x, y, [bg, label]).setSize(width, height).setInteractive({ useHandCursor: true });
-    button.on('pointerdown', () => gameStateStore.setSelectedPlaceable(kind));
-    this.buttonMap.set(kind, button);
-    this.applyButtonSelectionState(kind, gameStateStore.getSelectedPlaceable() === kind);
+    const mobId = gameStateStore.getNextMob();
+    this.nextMobIcon = this.add.image(x + 86, y, `mob-${mobId}`).setDisplaySize(36, 36);
+    this.nextMobLabel = this.add
+      .text(x - 78, y + 17, `ID: ${mobId}`, {
+        fontFamily: 'Arial',
+        fontSize: '20px',
+        color: '#f8fafc',
+        fontStyle: 'bold',
+      })
+      .setOrigin(0, 0.5);
   }
 
-  private applyButtonSelectionState(kind: PlaceableKind, isSelected: boolean): void {
-    const button = this.buttonMap.get(kind);
-    if (!button) {
-      return;
-    }
-
-    const scale = isSelected ? 1.04 : 1;
-    button.setScale(scale);
-    button.first?.setData('selected', isSelected);
-
-    const childBg = button.first as Phaser.GameObjects.Rectangle | undefined;
-    if (childBg) {
-      childBg.setStrokeStyle(3, isSelected ? 0xf8fafc : 0x64748b, 1);
-    }
+  private updateNextMobPanel(mobId: number): void {
+    this.nextMobLabel?.setText(`ID: ${mobId}`);
+    this.nextMobIcon?.setTexture(`mob-${mobId}`);
   }
 
   private attachStoreListeners(): void {
@@ -94,12 +85,10 @@ export class HudScene extends Phaser.Scene {
       this.timerText?.setText(`Time: ${formatTime(timeLeft)}`);
     });
 
-    gameStateStore.on(GAME_EVENTS.selectedPlaceableChanged, (selected: PlaceableKind | null) => {
-      this.buttonMap.forEach((_value, key) => this.applyButtonSelectionState(key, selected === key));
-    });
+    gameStateStore.on(GAME_EVENTS.nextMobChanged, (mobId: number) => this.updateNextMobPanel(mobId));
 
     gameStateStore.on(GAME_EVENTS.gameOver, () => {
-      this.buttonMap.forEach((button) => button.disableInteractive());
+      // HUD stays visible in game over state.
     });
   }
 }

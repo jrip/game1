@@ -19,7 +19,7 @@ export class GridSystem {
 
   public draw(scene: Phaser.Scene): void {
     const graphics = scene.add.graphics();
-    graphics.lineStyle(1, 0x273043, 1);
+    graphics.lineStyle(1, 0x8fb1d9, 0.55);
 
     for (let r = 0; r <= GRID_ROWS; r += 1) {
       const y = TOP_PANEL + r * CELL_SIZE;

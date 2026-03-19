@@ -4,4 +4,4 @@ export type CellPosition = {
 };
 
 export type CreatureKind = 'slime' | 'beetle';
-export type PlaceableKind = 'flower' | 'totem';
+export type PlaceableKind = number;
