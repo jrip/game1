@@ -285,7 +285,9 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    this.audioContext ??= new AudioCtor();
+    if (!this.audioContext) {
+      this.audioContext = new AudioCtor();
+    }
     const context = this.audioContext;
     const now = context.currentTime;
     const attackSeconds = MERGE_EFFECT_SETTINGS.sound.attackMs / 1000;
